@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'maintemplate.html' %}
+<head>
+    <title>Showtime</title>
+</head>
+<body>
+
+{% block content %}
+<style>
+    .showtime-container{
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+    }
+</style>
+
+<div class="showtime-container">
+    <div>
+        <h3>Now Showing</h3>
+        <hr>
+
+        <div>
+            <a href="{% url 'showtime' %}">ALL</a>
+        </div>
+        {% for movie in movie_names %}
+        <div>
+            <a href="{% url 'showtime' %}?q={{movie.title}}">{{movie.title}}</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <h5>{{showtime_count}} sessions available</h5>
+        <div>
+            {% for show in showtime %}
+            <div>
+                <h2>{{show.id}} -- <a href="{% url 'movie-information' show.movie %}"> {{show.movie}} </a></h2>
+                <p>Date: {{show.show_date}}</p>
+                <p>Price: {{show.price}}</p>
+                <p>Room: {{show.room}}</p>
+                <p>Starts at: {{show.startsAt}}</p>
+                <p>Ends at: {{show.endsAt}}</p>
+                <hr>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <h3><a href = "{% url 'booking'%}"> Book </a></h3>
+</div>
+{% endblock content%}
+</body>
+</html>
