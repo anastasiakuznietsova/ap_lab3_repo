@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class MovieGenre(models.Model):
     genre_name = models.CharField(max_length=20)
     def __str__(self):
@@ -66,6 +64,8 @@ class Showtime(models.Model):
     endsAt=models.TimeField()
     def __str__(self):
         return f'{self.movie}     {self.show_date}'
+    def getTimeline(self):
+        return f'{self.startsAt} -- {self.endsAt}'
     class Meta:
         db_table = 'Showtime'
 

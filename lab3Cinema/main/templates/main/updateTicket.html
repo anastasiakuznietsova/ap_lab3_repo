@@ -1,0 +1,14 @@
+{% extends 'maintemplate.html' %}
+
+{% block content %}
+
+<div>
+    <form method = "POST" action ="">
+        {% csrf_token %}
+        {{ ticket_form.as_p }}
+        {{ moviesession_form.as_p }}
+        <input type="submit" value="Update" />
+    </form>
+</div>
+
+{% endblock content%}
