@@ -1,18 +1,23 @@
-from django.urls import path
-from main import views
-from .views import (showtime, movie_information, viewer_information,
-                    ticketCancellation,bookATicket,updateTicket,JSONresponse)
-from .views import loginPage,logoutPage,registerPage
+from django.urls import path,include
+from . import views
+
+# from rest_framework.routers import DefaultRouter
+# router = DefaultRouter()
+# router.register(r'viewer',views.ViewerViewSet,basename='viewer')
+# router.register(r'ticket',views.TicketViewSet,basename='ticket')
+# router.register(r'user',views.UserViewSet,basename='user')
 
 urlpatterns = [
-    path('login/',loginPage,name='login'),
-    path('logout/',logoutPage,name='logout'),
-    path('register/',registerPage,name='register'),
-    path('', showtime, name='showtime' ),
-    path('booking/', bookATicket, name='booking' ),
-    path('movie-information/<str:title>/',movie_information, name='movie-information'),
-    path('accounts-info/', viewer_information, name='accounts-information'),
-    path('update-ticket/<int:id>', updateTicket, name='update-ticket'),
-    path('cancel-ticket/<int:id>', ticketCancellation, name='cancel-ticket'),
-    path('json-response/', JSONresponse, name='json-response'),
+    # path('',include(router.urls)),
+    path('viewers/',views.ViewerList.as_view()),
+    path('viewers/<int:pk>/',views.ViewerDetail.as_view()),
+    path('users/',views.UserList.as_view()),
+    path('users/info/',views.UserDetail.as_view()),
+    path('showtime/',views.ShowtimeList.as_view()),
+    path('showtime/<int:pk>/',views.ShowtimeDetails.as_view()),
+    path('movies/',views.MovieList.as_view()),
+    path('movies/<int:pk>/',views.MovieDetails.as_view()),
+    path('tickets/',views.TicketList.as_view()),
+    path('tickets/<int:pk>/',views.TicketDetail.as_view()),
+
 ]
