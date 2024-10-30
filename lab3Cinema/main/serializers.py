@@ -1,4 +1,4 @@
-from .models import Viewer, Ticket, MovieSession, Showtime
+from .models import Viewer, Ticket, MovieSession, Showtime,Movie
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -30,8 +30,8 @@ class TicketSerializer(serializers.ModelSerializer):
 class ShowtimeSerializer(serializers.ModelSerializer):
     class Meta:
         model=Showtime
-        fields=['show_date',
-                'price']
+        fields=['id','show_date',
+                'price', 'movie', 'room', 'startsAt', 'endsAt']
 
 class MovieSessionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,6 +39,8 @@ class MovieSessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MovieSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = MovieSession
-        fields = '__all__'
+        model = Movie
+        fields = ['id','title', 'premiere', 'moviegenre','agerestrictions',
+                  'animationformat','mov_length','premiere','mvdescription']

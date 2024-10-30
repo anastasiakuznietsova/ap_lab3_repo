@@ -1,0 +1,18 @@
+
+<h1> {{movie.title}} </h1>
+
+<div>
+    <div>
+        <p>Premier: {{movie.premiere}}</p>
+        <p>Genre: {{movie.moviegenre}}</p>
+        <p>Age restrictions: {{movie.agerestrictions}}</p>
+        <p>Animation format: {{movie.animationformat}}</p>
+        <p>Length: {{movie.mov_length}}</p>
+        <p>Premiere: {{movie.premiere}}</p>
+        <p>Description: {{movie.mvdescription}}</p>
+
+        <h4><a href="{% url 'main:update-movie' movie.pk %}">Update movie information</a></h4>
+        <h4><a href="{% url 'main:delete-movie' movie.pk %}">Delete a movie</a></h4>
+    </div>
+    <a href="{% url 'main:showtime'%}">Go to the showtime</a>
+</div>

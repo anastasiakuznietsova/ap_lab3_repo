@@ -1,0 +1,8 @@
+<div>
+    <form method="POST" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save changes" />
+    </form>
+    <a href="{{request.META.HTTP_REFERER}}">Go Back</a>
+</div>
