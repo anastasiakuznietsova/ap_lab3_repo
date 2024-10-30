@@ -1,12 +1,6 @@
-{% extends 'maintemplate.html' %}
-
-{% block content %}
-
 <form method="POST" action="">
     {% csrf_token %}
     <p>Are you sure you want to cancel booking?</p>
     <a href="{{request.META.HTTP_REFERER}}">Go Back</a>
     <input type="submit" value="Confirm"/>
 </form>
-
-{% endblock content %}

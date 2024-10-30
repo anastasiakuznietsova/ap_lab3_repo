@@ -31,4 +31,5 @@ class MovieForm(forms.ModelForm):
     class Meta:
         model = Movie
 
-        fields = '__all__'
+        fields = ['title', 'premiere', 'moviegenre', 'agerestrictions',
+                  'animationformat', 'mov_length', 'premiere', 'mvdescription']

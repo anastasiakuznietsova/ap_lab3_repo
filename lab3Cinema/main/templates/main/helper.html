@@ -1,0 +1,8 @@
+{% for item in items %}
+    <p>{{ item.first_name }} {{ item.last_name }}</p>
+    <p>({{ item.birth_year }} - {{ item.death_year }})</p>
+        <form action="{% url 'main:delete-object' item.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+        </form>
+        {% endfor %}

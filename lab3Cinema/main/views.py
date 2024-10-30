@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
-
+from django.shortcuts import render,redirect
+from django.urls import reverse_lazy
+from rest_framework.status import HTTP_400_BAD_REQUEST
+from django.contrib import messages
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework.response import Response
@@ -7,7 +10,13 @@ from rest_framework import viewsets
 from .serializers import MovieSerializer,UserSerializer, ViewerSerializer, TicketSerializer, ShowtimeSerializer, MovieSessionSerializer
 from rest_framework import status
 
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+import requests
 from .models import Viewer, Ticket, MovieSession, Showtime, Movie
+from .forms import MovieForm,ShowtimeForm
+from . import NetworkHelper
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class ViewerViewSet(viewsets.ModelViewSet):
@@ -169,19 +178,23 @@ class TicketDetail(APIView):
         session.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ShowtimeList(APIView):
-    def get(self, request):
-        showtime = Showtime.objects.all()
-        serializer = ShowtimeSerializer(showtime, many=True)
-        return Response(serializer.data)
-    def post(self, request, format=None):
-        if request.user.is_superuser:
-            serializer = ShowtimeSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+# class ShowtimeList(APIView):
+#     def get(self, request):
+#         showtime = Showtime.objects.all()
+#         serializer = ShowtimeSerializer(showtime, many=True)
+#         content={
+#             'showtime': serializer.data
+#         }
+#         return render(request, 'main/showtime.html', content)
+#     def post(self, request, format=None):
+#         if request.user.is_authenticated:
+#             serializer = ShowtimeSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(status=status.HTTP_403_FORBIDDEN)
+
 class ShowtimeDetails(APIView):
     def get_object(self, pk):
         try:
@@ -193,7 +206,7 @@ class ShowtimeDetails(APIView):
         serializer = ShowtimeSerializer(showtime_movie)
         return Response(serializer.data)
     def put(self, request, pk, format=None):
-        if request.user.is_superuser:
+        if request.user.is_authenticated:
             showtime_movie = self.get_object(pk)
             serializer = ShowtimeSerializer(showtime_movie, data=request.data)
             if serializer.is_valid():
@@ -202,7 +215,7 @@ class ShowtimeDetails(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_403_FORBIDDEN)
     def delete(self, request, pk):
-        if request.user.is_superuser:
+        if request.user.is_authenticated:
             showtime_movie=self.get_object(pk)
             showtime_movie.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -212,37 +225,93 @@ class MovieList(APIView):
     def get(self, request):
         movies = Movie.objects.all()
         serializer = MovieSerializer(movies, many=True)
-        return Response(serializer.data)
+        content={'movies':serializer.data}
+        return render(request, 'main/movies.html', content)
     def post(self, request, format=None):
-        if request.user.is_superuser:
+        if request.user.is_authenticated:
             serializer = MovieSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_403_FORBIDDEN)
-class MovieDetails(APIView):
-    def get_object(self, pk):
-        try:
-            return Movie.objects.get(pk=pk)
-        except Movie.DoesNotExist:
-            raise Http404
-    def get(self, request, pk, format=None):
-        movie = self.get_object(pk)
-        serializer = ShowtimeSerializer(movie)
-        return Response(serializer.data)
-    def put(self, request, pk, format=None):
-        if request.user.is_superuser:
-            movie = self.get_object(pk)
-            serializer = ShowtimeSerializer(movie, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    def delete(self, request, pk):
-        if request.user.is_superuser:
-            movie=self.get_object(pk)
-            movie.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+
+class ShowtimeList(ListView):
+    model = Showtime
+    template_name = "main/showtime.html"
+    context_object_name = "showtime"
+
+class ShowtimeDelete(DeleteView):
+    model = Showtime
+    template_name = 'main/delete.html'
+    success_url = reverse_lazy('main:showtime')
+
+class ShowtimeCreate(CreateView):
+    model = Showtime
+    form_class = ShowtimeForm
+    template_name = 'main/create.html'
+    success_url = reverse_lazy('main:showtime')
+
+class MovieDetails(DetailView):
+    model = Movie
+    template_name = 'main/movie_details.html'
+    context_object_name = 'movie'
+
+class MovieCreate(CreateView):
+    model = Movie
+    form_class = MovieForm
+    template_name = 'main/create.html'
+    success_url = reverse_lazy('main:showtime')
+
+class MovieUpdate(UpdateView):
+    model = Movie
+    form_class = MovieForm
+    template_name = 'main/update_movie.html'
+    success_url = reverse_lazy('main:showtime')
+
+class MovieDelete(DeleteView):
+    model = Movie
+    template_name = 'main/delete.html'
+    success_url = reverse_lazy('main:showtime')
+
+    # def get_object(self, title):
+    #     try:
+    #         return Movie.objects.get(title=title)
+    #     except Movie.DoesNotExist:
+    #         raise Http404
+    # def get(self, request, title, format=None):
+    #     movie = self.get_object(title)
+    #     serializer = MovieSerializer(movie)
+    #     content = {'movie_details': serializer.data}
+    #     return render(request, 'main/movie_details.html', content)
+
+    # @method_decorator(csrf_exempt)
+    # def put(self, request, title, format=None):
+    #     # if request.user.is_authenticated:
+    #         movie = self.get_object(title)
+    #         #serializer = MovieSerializer(movie, data=request.data)
+    #         movie_form = MovieForm(request.POST, instance=movie)
+    #         if movie_form.is_valid():
+    #             movie_form.save()
+    #             content={'movie_details': movie_form.instance}
+    #             return render(request, 'main/update_movie.html', content)
+    #         return render(request, 'main/update_movie.html', {'movie_form': movie_form}, status=400)
+    #     # return Response(status=status.HTTP_403_FORBIDDEN)
+    # def delete(self, request, title):
+    #     if request.user.is_authenticated:
+    #         movie=self.get_object(title)
+    #         movie.delete()
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    #     return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+
+def itemList(request):
+    items = NetworkHelper.getlist('http://127.0.0.1:1111/api/authors/')
+    return render(request, 'main/helper.html', {'items': items})
+
+def deleteItem(request,id):
+    if request.method == 'POST':
+        NetworkHelper.delete(f'http://127.0.0.1:1111/api/authors/{id}/')
+        return redirect('main:list-objects')
+
